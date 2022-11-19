@@ -20,24 +20,25 @@ Input | Output
 `camelCaseId` | `camelCaseId`
 `snake_case_id` | `snake_case_id`
 `__Schema` | `__Schema`
-`doxxing` | `doxxXxxXing`
-`id with spaces` | `idxx0withxx0spaces`
-`id-with.special$chars!` | `idxxDwithxxEspecialxx4charsxx1`
-`id_with_ümläutß` | `id_with_xxaaapmmlxxaaaoeutxxaaanp`
-`Emoji: 😅` | `EmojixxGxx0xxbpgaf`
-`Multi Byte Emoji: 👨‍🦲` | `Multixx0Bytexx0EmojixxGxx0xxbpegixxacaanxxbpjlc`
+`doxxing` | `doxxing`
+`DOXXING` | `DOXXXXXXING`
+`id with spaces` | `idXX0withXX0spaces`
+`id-with.special$chars!` | `idXXDwithXXEspecialXX4charsXX1`
+`id_with_ümläutß` | `id_with_XXaaapmmlXXaaaoeutXXaaanp`
+`Emoji: 😅` | `EmojiXXGXX0XXbpgaf`
+`Multi Byte Emoji: 👨‍🦲` | `MultiXX0ByteXX0EmojiXXGXX0XXbpegiXXacaanXXbpjlc`
 
 
 ## Explanation
 
 The encoding scheme is based on the following rules:
 
-1. All characters in `[0-9A-Za-z_]` except for `xx` are encoded as is
-1. `xx` is encoded as `xxXxxX`
+1. All characters in `[0-9A-Za-z_]` except for `XX` are encoded as is
+1. `XX` is encoded as `XXXXXX`
 1. All other printable characters inside the ASCII range
-    are encoded as a sequence of 3 characters: `xx[0-9A-W]`
+    are encoded as a sequence of 3 characters: `XX[0-9A-W]`
 1. All other Unicode codepoints are encoded as a sequence of 7 characters:
-    `xx[a-p]{5}`, where the 5 characters are the hexadecimal representation
+    `XX[a-p]{5}`, where the 5 characters are the hexadecimal representation
     with an alternative hex alphabet ranging from
     `a` to `p` instead of `0` to `f`.
 

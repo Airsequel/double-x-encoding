@@ -1,13 +1,14 @@
 import listOfNaughtyStrings from "npm:blns"
-import { underscoreEncode, underscoreDecode } from "./index.ts"
+import { doubleXEncode, doubleXDecode } from "./index.ts"
 
 let correctConversions = 0
 
 listOfNaughtyStrings.forEach(str => {
-  const encoded = underscoreEncode(str)
-  const decoded = underscoreDecode(encoded)
   console.info("===============================================\n")
   console.info("original:\t", str)
+
+  const encoded = doubleXEncode(str)
+  const decoded = doubleXDecode(encoded)
   console.info("encoded:\t", encoded)
   console.info("decoded:\t", decoded)
   if (str !== decoded ) {

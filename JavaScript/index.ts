@@ -35,7 +35,9 @@ const charEncode = {
   "|": "U",
   "}": "V",
   "~": "W",
-  "x": "X",
+
+  // TODO: Remove this parsing workaround. Should be "X": "X"
+  "X": "Z",
 }
 
 const charDecode = Object.fromEntries(
@@ -76,13 +78,13 @@ const hexShiftDecode = Object.fromEntries(
 )
 
 
-export function underscoreEncode (str: string): string {
-  const inNorm = str.replaceAll("xx", "xxXxxX")
+export function doubleXEncode (str: string): string {
+  const inNorm = str.replaceAll("XX", "XXXXXX")
 
   let resultStr = ""
 
   for (const char of inNorm) {
-    if (/[a-z0-9_]/i.test(char)) {
+    if (/[0-9A-Za-z_]/.test(char)) {
       resultStr += char
     }
     else {
@@ -96,7 +98,7 @@ export function underscoreEncode (str: string): string {
                 .join("")
                 .padStart(5, "a") ||
               ""
-      resultStr += "xx" + encodedChar
+      resultStr += "XX" + encodedChar
     }
   }
 
@@ -104,11 +106,15 @@ export function underscoreEncode (str: string): string {
 }
 
 
-export function underscoreDecode (str: string): string {
-  return str
-    .split(/(xx[0-9A-X]|xx[a-p]{5})/g)
+export function doubleXDecode (str: string): string {
+  // TODO: Remove this workaround to simplify parsing
+  const strNorm = str.replaceAll("XXXXXX", "XXZXXZ")
+
+  return strNorm
+    .split(/(XXZ|XX[0-9A-W]|XX[a-p]{5})/)
+    .filter(Boolean)  // Remove empty strings
     .map(word =>
-      word.startsWith("xx")
+      word.startsWith("XX")
       ? (word.slice(2, 3) >= "a" && word.slice(2, 3) <= "p"
           ? String.fromCodePoint(
               parseInt(
