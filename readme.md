@@ -11,6 +11,8 @@ Constraints for the encoding scheme:
     `FILE_FORMAT`, `__file_format__`, … must not be altered
 1. Support all Unicode characters
 1. Characters of the ASCII range must lead to shorter encodings
+1. Optional support for encoding leading digits (like in `1_file_format`)
+    to fulfill constraints of some ID schemes (e.g. GraphQL's).
 
 
 ## Examples
@@ -42,3 +44,5 @@ The encoding scheme is based on the following rules:
     with an alternative hex alphabet ranging from
     `a` to `p` instead of `0` to `f`.
 
+If the optional leading digit encoding is enabled,
+a leading digit is encoded as `XXZ[A-J]`, where `A` is `0` and `J` is `9`.

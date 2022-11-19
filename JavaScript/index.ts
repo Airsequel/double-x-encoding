@@ -37,12 +37,31 @@ const charEncode = {
   "~": "W",
 
   // TODO: Remove this parsing workaround. Should be "X": "X"
-  "X": "Z",
+  "X": "Y",
 }
 
 const charDecode = Object.fromEntries(
   Object
     .entries(charEncode)
+    .map(([k, v]) => [v, k])
+)
+
+const hexDigitEncode = {
+  "0": "A",
+  "1": "B",
+  "2": "C",
+  "3": "D",
+  "4": "E",
+  "5": "F",
+  "6": "G",
+  "7": "H",
+  "8": "I",
+  "9": "J",
+}
+
+const hexDigitDecode = Object.fromEntries(
+  Object
+    .entries(hexDigitEncode)
     .map(([k, v]) => [v, k])
 )
 
@@ -57,17 +76,11 @@ const hexShiftEncode = {
   "7": "h",
   "8": "i",
   "9": "j",
-  "A": "k",
   "a": "k",
-  "B": "l",
   "b": "l",
-  "C": "m",
   "c": "m",
-  "D": "n",
   "d": "n",
-  "E": "o",
   "e": "o",
-  "F": "p",
   "f": "p",
 }
 
@@ -106,12 +119,22 @@ export function doubleXEncode (str: string): string {
 }
 
 
+export function doubleXEncodeLeadingDigit (str: string): string {
+  const firstChar = str.slice(0, 1)
+  const firstDigitHex = hexDigitEncode[firstChar]
+  const firstCharEncoded = firstDigitHex
+    ? "XXZ" + firstDigitHex
+    : firstChar
+  return firstCharEncoded + doubleXEncode(str.slice(1))
+}
+
+
 export function doubleXDecode (str: string): string {
   // TODO: Remove this workaround to simplify parsing
-  const strNorm = str.replaceAll("XXXXXX", "XXZXXZ")
+  const strNorm = str.replaceAll("XXXXXX", "XXYXXY")
 
   return strNorm
-    .split(/(XXZ|XX[0-9A-W]|XX[a-p]{5})/)
+    .split(/(XXY|XXZ[A-J]|XX[0-9A-W]|XX[a-p]{5})/)
     .filter(Boolean)  // Remove empty strings
     .map(word =>
       word.startsWith("XX")
@@ -126,7 +149,9 @@ export function doubleXDecode (str: string): string {
                 16
               )
             )
-          : charDecode[word.slice(2, 3)]
+          : (word.slice(2, 3) == "Z")
+            ? hexDigitDecode[word.slice(3, 4)]
+            : charDecode[word.slice(2, 3)]
         )
       : word
     )
