@@ -28,13 +28,14 @@ const charEncode = {
   "\\": "O",
   "]": "P",
   "^": "Q",
-  "_": "R",
+  // "_": "R",
   "`": "S",
 
   "{": "T",
   "|": "U",
   "}": "V",
   "~": "W",
+  "x": "X",
 }
 
 const charDecode = Object.fromEntries(
@@ -76,7 +77,7 @@ const hexShiftDecode = Object.fromEntries(
 
 
 export function underscoreEncode (str: string): string {
-  const inNorm = str.replaceAll("__", "__R__R")
+  const inNorm = str.replaceAll("xx", "xxXxxX")
 
   let resultStr = ""
 
@@ -95,7 +96,7 @@ export function underscoreEncode (str: string): string {
                 .join("")
                 .padStart(5, "a") ||
               ""
-      resultStr += "__" + encodedChar
+      resultStr += "xx" + encodedChar
     }
   }
 
@@ -105,9 +106,9 @@ export function underscoreEncode (str: string): string {
 
 export function underscoreDecode (str: string): string {
   return str
-    .split(/(__[0-9A-W]|__[a-p]{5})/g)
+    .split(/(xx[0-9A-X]|xx[a-p]{5})/g)
     .map(word =>
-      word.startsWith("__")
+      word.startsWith("xx")
       ? (word.slice(2, 3) >= "a" && word.slice(2, 3) <= "p"
           ? String.fromCodePoint(
               parseInt(
