@@ -28,7 +28,7 @@ const charEncode = {
   "\\": "O",
   "]": "P",
   "^": "Q",
-  // "_": "R",
+  "_": "R",
   "`": "S",
 
   "{": "T",
@@ -38,6 +38,8 @@ const charEncode = {
 
   // TODO: Remove this parsing workaround. Should be "X": "X"
   "X": "Y",
+
+  // "": "Z",  // Reserved for encoding digits
 }
 
 const charDecode = Object.fromEntries(
@@ -91,8 +93,30 @@ const hexShiftDecode = Object.fromEntries(
 )
 
 
-export function doubleXEncode (str: string): string {
-  const inNorm = str.replaceAll("XX", "XXXXXX")
+export function doubleXEncode (
+  str: string,
+  options: {
+    encodeLeadingDigit?: boolean,
+    encodeDoubleUnderscore?: boolean,
+  } = {},
+): string {
+  if (options.encodeLeadingDigit) {
+    const firstChar = str.slice(0, 1)
+    const firstDigitHex = hexDigitEncode[firstChar]
+    const firstCharEncoded = firstDigitHex
+      ? "XXZ" + firstDigitHex
+      : firstChar
+
+    options.encodeLeadingDigit = false
+
+    return firstCharEncoded + doubleXEncode(str.slice(1), options)
+  }
+
+  let inNorm = str.replaceAll("XX", "XXXXXX")
+
+  if (options.encodeDoubleUnderscore) {
+    inNorm = inNorm.replaceAll("__", "XXRXXR")
+  }
 
   let resultStr = ""
 
@@ -116,16 +140,6 @@ export function doubleXEncode (str: string): string {
   }
 
   return resultStr
-}
-
-
-export function doubleXEncodeLeadingDigit (str: string): string {
-  const firstChar = str.slice(0, 1)
-  const firstDigitHex = hexDigitEncode[firstChar]
-  const firstCharEncoded = firstDigitHex
-    ? "XXZ" + firstDigitHex
-    : firstChar
-  return firstCharEncoded + doubleXEncode(str.slice(1))
 }
 
 

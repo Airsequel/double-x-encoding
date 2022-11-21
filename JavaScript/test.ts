@@ -2,11 +2,11 @@ import listOfNaughtyStrings from "npm:blns"
 import {
   doubleXEncode,
   doubleXDecode,
-  doubleXEncodeLeadingDigit,
 } from "./index.ts"
 
 let correctConversions = 0
 let correctDigitConversions = 0
+let correctDblUnderConversions = 0
 
 listOfNaughtyStrings.forEach(str => {
   console.info("===============================================\n")
@@ -26,7 +26,7 @@ listOfNaughtyStrings.forEach(str => {
     correctConversions += 1
   }
 
-  const encodedDigit = doubleXEncodeLeadingDigit(str)
+  const encodedDigit = doubleXEncode(str, { encodeLeadingDigit: true })
   const decodedDigit = doubleXDecode(encodedDigit)
   console.info("encoded leading digit:\t", encodedDigit)
   console.info("decoded leadingt digit:\t", decodedDigit)
@@ -40,6 +40,20 @@ listOfNaughtyStrings.forEach(str => {
     correctDigitConversions += 1
   }
 
+  const encodedDblUnder = doubleXEncode(str, { encodeDoubleUnderscore: true })
+  const decodedDblUnder = doubleXDecode(encodedDblUnder)
+  console.info("encoded DblUnder:\t", encodedDblUnder)
+  console.info("decoded DblUnder:\t", decodedDblUnder)
+  if (str !== decodedDblUnder ) {
+    throw new Error(
+      `ERROR: Decoded string "${decodedDblUnder
+      }" is not equal to original string "${str}"`
+    )
+  }
+  else {
+    correctDblUnderConversions += 1
+  }
+
   console.log("\x1Bc")
 })
 
@@ -50,4 +64,6 @@ console.info(`
     correctConversions}/${listOfNaughtyStrings.length}
   Correct Leading Digit conversions: ${
     correctDigitConversions}/${listOfNaughtyStrings.length}
+  Correct Leading Digit conversions: ${
+    correctDblUnderConversions}/${listOfNaughtyStrings.length}
 `)

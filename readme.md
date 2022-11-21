@@ -30,6 +30,14 @@ Input | Output
 `Emoji: 😅` | `EmojiXXGXX0XXbpgaf`
 `Multi Byte Emoji: 👨‍🦲` | `MultiXX0ByteXX0EmojiXXGXX0XXbpegiXXacaanXXbpjlc`
 
+With encoding of leading digit and double underscore activated
+(necessary for GraphQL ID generation):
+
+Input | Output
+------|-------
+`1FileFormat` | `XXZAFileFormat`
+`__index__` | `XXRXXRindexXXRXXR`
+
 
 ## Explanation
 
@@ -46,3 +54,6 @@ The encoding scheme is based on the following rules:
 
 If the optional leading digit encoding is enabled,
 a leading digit is encoded as `XXZ[A-J]`, where `A` is `0` and `J` is `9`.
+
+If the optional double underscore encoding is enabled,
+double underscores are encoded as `XXRXXR`.
