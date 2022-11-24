@@ -2,6 +2,8 @@
 
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE MultiWayIf #-}
+
 module Haskell.DoubleXEncode where
 
 import Data.Function ((&))
@@ -9,8 +11,8 @@ import qualified Data.Text as T
 import Data.Text (replace, Text)
 import Data.Functor ((<&>))
 import Distribution.Utils.Generic (isAsciiAlphaNum)
-import Numeric (showHex)
-import Data.Char (ord, isDigit)
+import Numeric (showHex, readHex)
+import Data.Char (ord, isDigit, chr)
 import Control.Monad (join)
 import Debug.Trace (traceShowId)
 
@@ -240,3 +242,64 @@ doubleXEncode encodeOptions text =
                     (T.pack rest)
     else
       encodeStandard text
+
+
+parseHex :: Text -> Int
+parseHex text =
+  case readHex (T.unpack text) of
+    [(int, "")] -> int
+    _ -> 0
+
+
+doubleXDecode :: Text -> Text
+doubleXDecode text =
+  let
+    decodeWord :: Text -> (Text, Text)
+    decodeWord word =
+      let
+        noXX = T.drop 2 word
+        first = T.take 1 noXX
+      in
+        if  | first >= "a" && first <= "p" ->
+                (T.pack [
+                    noXX
+                      & T.unpack
+                      & take 5
+                      <&> hexShiftDecode
+                      & T.pack
+                      & parseHex
+                      & chr
+                  ]
+                , T.drop 5 noXX
+                )
+
+            | first == "X" ->
+                ("X", T.drop 1 noXX)
+
+            | first == "Z" ->
+                (noXX
+                    & T.drop 1
+                    & T.take 1
+                    & T.unpack
+                    <&> hexDigitDecode
+                    & T.pack
+                , T.drop 2 noXX
+                )
+
+            | otherwise ->
+              (noXX
+                & T.take 1
+                & T.unpack
+                <&> charDecode
+                & T.pack
+              , T.drop 1 noXX
+              )
+  in
+    text
+      & T.breakOn "XX"
+      & \case
+          ("", end) -> case decodeWord end of
+            (decoded, "") -> decoded
+            (decoded, rest) -> decoded <> doubleXDecode rest
+          (start, "") -> start
+          (start, end) -> start <> doubleXDecode end
