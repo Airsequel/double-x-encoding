@@ -3,6 +3,7 @@ module Haskell.Test where
 
 import Data.Function ((&))
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import Data.Functor ((<&>))
 import Distribution.Utils.Generic (isAsciiAlphaNum)
 import Numeric (showHex)
@@ -16,7 +17,7 @@ import Haskell.DoubleXEncode (EncodeOptions(..), doubleXEncode, doubleXDecode)
 main :: IO ()
 main = do
   let
-    getEncoderTest encoder a b = putStrLn $ T.unpack $
+    getEncoderTest encoder a b = T.putStrLn $
       if encoder a /= b
       then
         "❌ ENCODE ERROR: "
@@ -53,7 +54,10 @@ main = do
   expectEncode "0test" "0test"
   expectEncode "doxxing" "doxxing"
   expectEncode "DOXXING" "DOXXXXXXING"
+  expectEncode "XXX" "XXXXXXX"
+  expectEncode ">XXX<" "XXKXXXXXXXXXI"
   expectEncode "id with spaces" "idXX0withXX0spaces"
+  expectEncode "%" "XX5"
   expectEncode "id-with.special$chars!" "idXXDwithXXEspecialXX4charsXX1"
   expectEncode "id_with_ümläutß" "id_with_XXaaapmmlXXaaaoeutXXaaanp"
   expectEncode "Emoji: 😅" "EmojiXXGXX0XXbpgaf"
@@ -62,3 +66,29 @@ main = do
 
   expectEncodeGql "__Schema" "XXRXXRSchema"
   expectEncodeGql "0test" "XXZAtest"
+
+  -- https://github.com/minimaxir/big-list-of-naughty-strings
+  txtFile <- readFile "Haskell/blns.txt"
+
+  let
+    blns = T.lines $ T.pack txtFile
+    blnsFiltered = blns & filter
+      (\line -> not (T.null line) && not (T.isPrefixOf "#" line))
+
+    testEncodeDecode str =
+      if str /= doubleXDecode (encode str)
+      then "❌ \"" <> doubleXDecode (encode str) <> "\" /= \"" <> str <> "\""
+      else "✅"
+
+    testEncodeGqlDecode str =
+      if str /= doubleXDecode (encodeGql str)
+      then "❌ \"" <> doubleXDecode (encodeGql str) <> "\" /= \"" <> str <> "\""
+      else "✅"
+
+  T.putStrLn "\n\n========== ENCODE - DECODE =========="
+  blnsFiltered <&> testEncodeDecode <&> T.putStr & sequence_
+
+  T.putStrLn "\n\n========== ENCODE GQL - DECODE =========="
+  blnsFiltered <&> testEncodeGqlDecode <&> T.putStr & sequence_
+
+  pure ()

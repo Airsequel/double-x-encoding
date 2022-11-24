@@ -227,16 +227,14 @@ doubleXEncode encodeOptions text =
       case T.unpack text of
         "" -> ""
 
-        [leadingDigit]  ->
-            encodeDigit leadingDigit
-
-        leadingDigit : rest  ->
-          if not $ isDigit leadingDigit
+        leadingChar : rest  ->
+          if not $ isDigit leadingChar
           then encodeStandard text
           else
-            let
-            in
-              encodeDigit leadingDigit
+            if null rest
+            then encodeDigit leadingChar
+            else
+              encodeDigit leadingChar
               <> doubleXEncode
                     encodeOptions { encodeLeadingDigit = False }
                     (T.pack rest)
@@ -274,7 +272,9 @@ doubleXDecode text =
                 )
 
             | first == "X" ->
-                ("X", T.drop 1 noXX)
+                if "XXXX" `T.isPrefixOf` noXX
+                then ("XX", T.drop 4 noXX)
+                else ("X", T.drop 1 word)
 
             | first == "Z" ->
                 (noXX
