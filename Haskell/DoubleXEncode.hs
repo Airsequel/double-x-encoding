@@ -191,8 +191,8 @@ data EncodeOptions = EncodeOptions
   }
 
 
-doubleXEncode :: EncodeOptions -> Text -> Text
-doubleXEncode encodeOptions text =
+doubleXEncodeWithOptions :: EncodeOptions -> Text -> Text
+doubleXEncodeWithOptions encodeOptions text =
   let
     encodeStandard text = text
       & replace "XX" "XXXXXX"
@@ -225,7 +225,7 @@ doubleXEncode encodeOptions text =
     if encodeOptions&encodeLeadingDigit
     then
       case T.unpack text of
-        "" -> ""
+        [] -> ""
 
         leadingChar : rest  ->
           if not $ isDigit leadingChar
@@ -235,11 +235,37 @@ doubleXEncode encodeOptions text =
             then encodeDigit leadingChar
             else
               encodeDigit leadingChar
-              <> doubleXEncode
+              <> doubleXEncodeWithOptions
                     encodeOptions { encodeLeadingDigit = False }
                     (T.pack rest)
     else
       encodeStandard text
+
+
+
+
+defaultOptions :: EncodeOptions
+defaultOptions = EncodeOptions
+    { encodeLeadingDigit = False
+    , encodeDoubleUnderscore = False
+    }
+
+
+doubleXEncode :: Text -> Text
+doubleXEncode =
+    doubleXEncodeWithOptions defaultOptions
+
+
+gqlOptions :: EncodeOptions
+gqlOptions = EncodeOptions
+    { encodeLeadingDigit = True
+    , encodeDoubleUnderscore = True
+    }
+
+
+doubleXEncodeGql :: Text -> Text
+doubleXEncodeGql =
+    doubleXEncodeWithOptions gqlOptions
 
 
 parseHex :: Text -> Int

@@ -11,7 +11,8 @@ import Data.Char (ord, isDigit)
 import Control.Monad (join)
 import Debug.Trace (traceShowId)
 
-import Haskell.DoubleXEncode (EncodeOptions(..), doubleXEncode, doubleXDecode)
+import Haskell.DoubleXEncode
+  (EncodeOptions(..), doubleXEncode, doubleXEncodeGql, doubleXDecode)
 
 
 main :: IO ()
@@ -30,23 +31,12 @@ main = do
         else
           "✅ " <> a <> ": " <> encoder a <> " == " <> b
 
-    encode = doubleXEncode
-      (EncodeOptions
-        { encodeLeadingDigit = False
-        , encodeDoubleUnderscore = False
-        }
-      )
-    expectEncode a b =
-      getEncoderTest encode a b
 
-    encodeGql = doubleXEncode
-        (EncodeOptions
-          { encodeLeadingDigit = True
-          , encodeDoubleUnderscore = True
-          }
-        )
+    expectEncode a b =
+      getEncoderTest doubleXEncode a b
+
     expectEncodeGql a b =
-      getEncoderTest encodeGql a b
+      getEncoderTest doubleXEncodeGql a b
 
   expectEncode "camelCaseId" "camelCaseId"
   expectEncode "snake_case_id" "snake_case_id"
@@ -76,13 +66,23 @@ main = do
       (\line -> not (T.null line) && not (T.isPrefixOf "#" line))
 
     testEncodeDecode str =
-      if str /= doubleXDecode (encode str)
-      then "❌ \"" <> doubleXDecode (encode str) <> "\" /= \"" <> str <> "\""
+      if str /= doubleXDecode (doubleXEncode str)
+      then
+        "❌ \""
+        <> doubleXDecode (doubleXEncode str)
+        <> "\" /= \""
+        <> str
+        <> "\""
       else "✅"
 
     testEncodeGqlDecode str =
-      if str /= doubleXDecode (encodeGql str)
-      then "❌ \"" <> doubleXDecode (encodeGql str) <> "\" /= \"" <> str <> "\""
+      if str /= doubleXDecode (doubleXEncodeGql str)
+      then
+        "❌ \""
+        <> doubleXDecode (doubleXEncodeGql str)
+        <> "\" /= \""
+        <> str
+        <> "\""
       else "✅"
 
   T.putStrLn "\n\n========== ENCODE - DECODE =========="

@@ -1,12 +1,12 @@
 module Test exposing (..)
 
-import Base64
 import Blns exposing (blns)
 import DoubleXEncode exposing (..)
 import Html exposing (div, text)
 import Html.Attributes exposing (style)
 
 
+main : Html.Html msg
 main =
     let
         getEncoderTest encoder a b =
@@ -29,23 +29,11 @@ main =
             else
                 "✅ " ++ a ++ ": " ++ encoder a ++ " == " ++ b
 
-        encode =
-            doubleXEncode
-                { encodeLeadingDigit = False
-                , encodeDoubleUnderscore = False
-                }
-
         expectEncode a b =
-            getEncoderTest encode a b
-
-        encodeGql =
-            doubleXEncode
-                { encodeLeadingDigit = True
-                , encodeDoubleUnderscore = True
-                }
+            getEncoderTest doubleXEncode a b
 
         expectEncodeGql a b =
-            getEncoderTest encodeGql a b
+            getEncoderTest doubleXEncodeGql a b
 
         blnsFiltered =
             blns
@@ -55,15 +43,23 @@ main =
                     )
 
         testEncodeDecode str =
-            if str /= doubleXDecode (encode str) then
-                "❌ \"" ++ doubleXDecode (encode str) ++ "\" /= \"" ++ str ++ "\""
+            if str /= doubleXDecode (doubleXEncode str) then
+                "❌ \""
+                    ++ doubleXDecode (doubleXEncode str)
+                    ++ "\" /= \""
+                    ++ str
+                    ++ "\""
 
             else
                 "✅ "
 
         testEncodeGqlDecode str =
-            if str /= doubleXDecode (encodeGql str) then
-                "❌ \"" ++ doubleXDecode (encodeGql str) ++ "\" /= \"" ++ str ++ "\""
+            if str /= doubleXDecode (doubleXEncodeGql str) then
+                "❌ \""
+                    ++ doubleXDecode (doubleXEncodeGql str)
+                    ++ "\" /= \""
+                    ++ str
+                    ++ "\""
 
             else
                 "✅ "

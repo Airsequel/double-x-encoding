@@ -4,7 +4,7 @@ module DoubleXEncode exposing (..)
 -}
 
 import String exposing (replace)
-import UInt64 exposing (UInt64)
+import UInt64
 import UInt64.Digits
 
 
@@ -436,8 +436,8 @@ type alias EncodeOptions =
     }
 
 
-doubleXEncode : EncodeOptions -> String -> String
-doubleXEncode encodeOptions string =
+doubleXEncodeWithOptions : EncodeOptions -> String -> String
+doubleXEncodeWithOptions encodeOptions string =
     let
         encodeStandard str =
             str
@@ -465,7 +465,8 @@ doubleXEncode encodeOptions string =
                                     char
                                         |> Char.toCode
                                         |> UInt64.fromInt
-                                        |> UInt64.toDigits UInt64.Digits.hexLower
+                                        |> UInt64.toDigits
+                                            UInt64.Digits.hexLower
                                         |> UInt64.Digits.toString
 
                                 charHexEncoded =
@@ -497,12 +498,36 @@ doubleXEncode encodeOptions string =
 
                 else
                     encodeDigit leadingChar
-                        ++ doubleXEncode
+                        ++ doubleXEncodeWithOptions
                             { encodeOptions | encodeLeadingDigit = False }
                             (String.fromList rest)
 
     else
         encodeStandard string
+
+
+defaultOptions : EncodeOptions
+defaultOptions =
+    { encodeLeadingDigit = False
+    , encodeDoubleUnderscore = False
+    }
+
+
+doubleXEncode : String -> String
+doubleXEncode =
+    doubleXEncodeWithOptions defaultOptions
+
+
+gqlOptions : EncodeOptions
+gqlOptions =
+    { encodeLeadingDigit = True
+    , encodeDoubleUnderscore = True
+    }
+
+
+doubleXEncodeGql : String -> String
+doubleXEncodeGql =
+    doubleXEncodeWithOptions gqlOptions
 
 
 parseHex : String -> Int
