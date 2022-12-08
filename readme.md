@@ -57,3 +57,9 @@ a leading digit is encoded as `XXZ[0-9]`.
 
 If the optional double underscore encoding is enabled,
 double underscores are encoded as `XXRXXR`.
+
+
+## Installation
+
+The code is not yet available via common package managers.
+Please copy the code into your project for the time being.
