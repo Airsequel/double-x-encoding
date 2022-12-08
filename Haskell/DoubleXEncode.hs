@@ -109,38 +109,6 @@ charDecode = \case
   _ -> '\0'
 
 
-hexDigitEncode :: Char -> Char
-hexDigitEncode = \case
-  '0' -> 'A'
-  '1' -> 'B'
-  '2' -> 'C'
-  '3' -> 'D'
-  '4' -> 'E'
-  '5' -> 'F'
-  '6' -> 'G'
-  '7' -> 'H'
-  '8' -> 'I'
-  '9' -> 'J'
-
-  _ -> '\0'
-
-
-hexDigitDecode :: Char -> Char
-hexDigitDecode = \case
-  'A' -> '0'
-  'B' -> '1'
-  'C' -> '2'
-  'D' -> '3'
-  'E' -> '4'
-  'F' -> '5'
-  'G' -> '6'
-  'H' -> '7'
-  'I' -> '8'
-  'J' -> '9'
-
-  _ -> '\0'
-
-
 hexShiftEncode :: Char -> Char
 hexShiftEncode = \case
   '0' -> 'a'
@@ -220,7 +188,7 @@ doubleXEncodeWithOptions encodeOptions text =
       & T.pack
 
     encodeDigit digit =
-      T.pack ['X', 'X', 'Z', hexDigitEncode digit]
+      T.pack ['X', 'X', 'Z', digit]
   in
     if encodeOptions&encodeLeadingDigit
     then
@@ -306,9 +274,6 @@ doubleXDecode text =
                 (noXX
                     & T.drop 1
                     & T.take 1
-                    & T.unpack
-                    <&> hexDigitDecode
-                    & T.pack
                 , T.drop 2 noXX
                 )
 

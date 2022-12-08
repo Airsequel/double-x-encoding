@@ -48,25 +48,6 @@ const charDecode = Object.fromEntries(
     .map(([k, v]) => [v, k])
 )
 
-const hexDigitEncode = {
-  "0": "A",
-  "1": "B",
-  "2": "C",
-  "3": "D",
-  "4": "E",
-  "5": "F",
-  "6": "G",
-  "7": "H",
-  "8": "I",
-  "9": "J",
-}
-
-const hexDigitDecode = Object.fromEntries(
-  Object
-    .entries(hexDigitEncode)
-    .map(([k, v]) => [v, k])
-)
-
 const hexShiftEncode = {
   "0": "a",
   "1": "b",
@@ -102,9 +83,8 @@ export function doubleXEncode (
 ): string {
   if (options.encodeLeadingDigit) {
     const firstChar = str.slice(0, 1)
-    const firstDigitHex = hexDigitEncode[firstChar]
-    const firstCharEncoded = firstDigitHex
-      ? "XXZ" + firstDigitHex
+    const firstCharEncoded = /^[0-9]$/.test(firstChar)
+      ? "XXZ" + firstChar
       : firstChar
 
     options.encodeLeadingDigit = false
@@ -148,7 +128,7 @@ export function doubleXDecode (str: string): string {
   const strNorm = str.replaceAll("XXXXXX", "XXYXXY")
 
   return strNorm
-    .split(/(XXY|XXZ[A-J]|XX[0-9A-W]|XX[a-p]{5})/)
+    .split(/(XXY|XXZ[0-9]|XX[0-9A-W]|XX[a-p]{5})/)
     .filter(Boolean)  // Remove empty strings
     .map(word =>
       word.startsWith("XX")
@@ -164,7 +144,7 @@ export function doubleXDecode (str: string): string {
               )
             )
           : (word.slice(2, 3) == "Z")
-            ? hexDigitDecode[word.slice(3, 4)]
+            ? word.slice(3, 4)
             : charDecode[word.slice(2, 3)]
         )
       : word

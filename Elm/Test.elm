@@ -35,6 +35,18 @@ main =
         expectEncodeGql a b =
             getEncoderTest doubleXEncodeGql a b
 
+        expectDecode a b =
+            if doubleXDecode a /= b then
+                "❌ DECODE ERROR: "
+                    ++ a
+                    ++ " | "
+                    ++ doubleXDecode a
+                    ++ " /= "
+                    ++ b
+
+            else
+                "✅ " ++ a ++ ": " ++ doubleXDecode a ++ " == " ++ b
+
         blnsFiltered =
             blns
                 |> List.filter
@@ -80,7 +92,9 @@ main =
     , expectEncode "Multi Byte Emoji: 👨\u{200D}🦲"
         "MultiXX0ByteXX0EmojiXXGXX0XXbpegiXXacaanXXbpjlc"
     , expectEncodeGql "__Schema" "XXRXXRSchema"
-    , expectEncodeGql "0test" "XXZAtest"
+    , expectEncodeGql "also__middle" "alsoXXRXXRmiddle"
+    , expectEncodeGql "0test" "XXZ0test"
+    , expectDecode "alsoXXZ0middle" "also0middle"
     , "========== ENCODE - DECODE =========="
     , blnsFiltered |> List.map testEncodeDecode |> String.join ""
     , "========== ENCODE GQL - DECODE =========="

@@ -35,7 +35,7 @@ With encoding of leading digit and double underscore activated
 
 Input | Output
 ------|-------
-`1FileFormat` | `XXZAFileFormat`
+`1FileFormat` | `XXZ1FileFormat`
 `__index__` | `XXRXXRindexXXRXXR`
 
 
@@ -53,7 +53,7 @@ The encoding scheme is based on the following rules:
     `a` to `p` instead of `0` to `f`.
 
 If the optional leading digit encoding is enabled,
-a leading digit is encoded as `XXZ[A-J]`, where `A` is `0` and `J` is `9`.
+a leading digit is encoded as `XXZ[0-9]`.
 
 If the optional double underscore encoding is enabled,
 double underscores are encoded as `XXRXXR`.

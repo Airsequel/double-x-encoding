@@ -232,80 +232,6 @@ charDecode char =
             '\u{0000}'
 
 
-hexDigitEncode : Char -> Char
-hexDigitEncode digit =
-    case digit of
-        '0' ->
-            'A'
-
-        '1' ->
-            'B'
-
-        '2' ->
-            'C'
-
-        '3' ->
-            'D'
-
-        '4' ->
-            'E'
-
-        '5' ->
-            'F'
-
-        '6' ->
-            'G'
-
-        '7' ->
-            'H'
-
-        '8' ->
-            'I'
-
-        '9' ->
-            'J'
-
-        _ ->
-            '\u{0000}'
-
-
-hexDigitDecode : Char -> Char
-hexDigitDecode digit =
-    case digit of
-        'A' ->
-            '0'
-
-        'B' ->
-            '1'
-
-        'C' ->
-            '2'
-
-        'D' ->
-            '3'
-
-        'E' ->
-            '4'
-
-        'F' ->
-            '5'
-
-        'G' ->
-            '6'
-
-        'H' ->
-            '7'
-
-        'I' ->
-            '8'
-
-        'J' ->
-            '9'
-
-        _ ->
-            '\u{0000}'
-
-
 hexShiftEncode : Char -> Char
 hexShiftEncode digit =
     case digit of
@@ -482,7 +408,7 @@ doubleXEncodeWithOptions encodeOptions string =
                 |> String.fromList
 
         encodeDigit digit =
-            String.fromList [ 'X', 'X', 'Z', hexDigitEncode digit ]
+            String.fromList [ 'X', 'X', 'Z', digit ]
     in
     if encodeOptions.encodeLeadingDigit then
         case String.toList string of
@@ -573,9 +499,6 @@ doubleXDecode text =
                 ( noXX
                     |> String.dropLeft 1
                     |> String.left 1
-                    |> String.toList
-                    |> List.map hexDigitDecode
-                    |> String.fromList
                 , noXX |> String.dropLeft 2
                 )
 

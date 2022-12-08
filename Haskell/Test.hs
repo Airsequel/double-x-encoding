@@ -38,6 +38,14 @@ main = do
     expectEncodeGql a b =
       getEncoderTest doubleXEncodeGql a b
 
+    expectDecode a b = T.putStrLn $
+        if doubleXDecode a /= b
+        then
+            "❌ DECODE ERROR: "
+            <> a <> " | " <> doubleXDecode a <> " /= " <> b
+        else
+            "✅ " <> a <> ": " <> doubleXDecode a <> " == " <> b
+
   expectEncode "camelCaseId" "camelCaseId"
   expectEncode "snake_case_id" "snake_case_id"
   expectEncode "__Schema" "__Schema"
@@ -55,7 +63,9 @@ main = do
     "MultiXX0ByteXX0EmojiXXGXX0XXbpegiXXacaanXXbpjlc"
 
   expectEncodeGql "__Schema" "XXRXXRSchema"
-  expectEncodeGql "0test" "XXZAtest"
+  expectEncodeGql "also__middle" "alsoXXRXXRmiddle"
+  expectEncodeGql "0test" "XXZ0test"
+  expectDecode "alsoXXZ0middle" "also0middle"
 
   -- https://github.com/minimaxir/big-list-of-naughty-strings
   txtFile <- readFile "Haskell/blns.txt"
@@ -85,10 +95,12 @@ main = do
         <> "\""
       else "✅"
 
-  T.putStrLn "\n\n========== ENCODE - DECODE =========="
+  T.putStrLn "\n\n============ ENCODE - DECODE ============"
   blnsFiltered <&> testEncodeDecode <&> T.putStr & sequence_
 
   T.putStrLn "\n\n========== ENCODE GQL - DECODE =========="
   blnsFiltered <&> testEncodeGqlDecode <&> T.putStr & sequence_
+
+  T.putStrLn "\n\n============== HASKELL END ==============\n\n"
 
   pure ()
