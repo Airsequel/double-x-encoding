@@ -1,4 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
+
+{- ORMOLU_DISABLE -}
+
 module Haskell.Test where
 
 import Data.Function ((&))
@@ -9,7 +12,6 @@ import Distribution.Utils.Generic (isAsciiAlphaNum)
 import Numeric (showHex)
 import Data.Char (ord, isDigit)
 import Control.Monad (join)
-import Debug.Trace (traceShowId)
 
 import Haskell.DoubleXEncode
   (EncodeOptions(..), doubleXEncode, doubleXEncodeGql, doubleXDecode)
@@ -61,6 +63,9 @@ main = do
   expectEncode "Emoji: 😅" "EmojiXXGXX0XXbpgaf"
   expectEncode "Multi Byte Emoji: \x1f468\x200D\x1f9b2"
     "MultiXX0ByteXX0EmojiXXGXX0XXbpegiXXacaanXXbpjlc"
+  -- Support characters from the Supplementary Private Use Area-B
+  expectEncode "\x100000" "XXYbaaaaa"
+  expectEncode "\x10FFFF" "XXYbapppp"
 
   expectEncodeGql "__Schema" "XXRXXRSchema"
   expectEncodeGql "also__middle" "alsoXXRXXRmiddle"
@@ -100,7 +105,5 @@ main = do
 
   T.putStrLn "\n\n========== ENCODE GQL - DECODE =========="
   blnsFiltered <&> testEncodeGqlDecode <&> T.putStr & sequence_
-
-  T.putStrLn "\n\n============== HASKELL END ==============\n\n"
 
   pure ()

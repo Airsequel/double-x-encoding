@@ -367,7 +367,6 @@ doubleXEncodeWithOptions encodeOptions string =
     let
         encodeStandard str =
             str
-                |> Debug.log "asdf"
                 |> replace "XX" "XXXXXX"
                 |> (\txt ->
                         if encodeOptions.encodeDoubleUnderscore then
@@ -401,8 +400,21 @@ doubleXEncodeWithOptions encodeOptions string =
                                         |> List.map hexShiftEncode
                                         |> String.fromList
                             in
-                            String.toList
-                                ("XX" ++ String.padLeft 5 'a' charHexEncoded)
+                            if String.length charHexEncoded <= 5 then
+                                String.toList
+                                    ("XX"
+                                        ++ String.padLeft 5 'a' charHexEncoded
+                                    )
+
+                            else if String.length charHexEncoded == 6 then
+                                String.toList
+                                    ("XXY"
+                                        ++ String.padLeft 6 'a' charHexEncoded
+                                    )
+
+                            else
+                                String.toList
+                                    "ERROR: Hex encoding is too long"
                     )
                 |> List.concat
                 |> String.fromList
@@ -495,11 +507,27 @@ doubleXDecode text =
                 else
                     ( "X", word |> String.dropLeft 1 )
 
+            else if first == "Y" then
+                ( String.fromList
+                    [ noXX
+                        |> String.dropLeft 1
+                        |> String.toList
+                        |> List.take 6
+                        |> List.map hexShiftDecode
+                        |> String.fromList
+                        |> parseHex
+                        |> Char.fromCode
+                    ]
+                , noXX
+                    |> String.dropLeft 7
+                )
+
             else if first == "Z" then
                 ( noXX
                     |> String.dropLeft 1
                     |> String.left 1
-                , noXX |> String.dropLeft 2
+                , noXX
+                    |> String.dropLeft 2
                 )
 
             else

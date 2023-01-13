@@ -1,4 +1,5 @@
 {-| Implementation of double-X-encoder and -decoder in Haskell -}
+{- ORMOLU_DISABLE -}
 
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -14,7 +15,6 @@ import Distribution.Utils.Generic (isAsciiAlphaNum)
 import Numeric (showHex, readHex)
 import Data.Char (ord, isDigit, chr)
 import Control.Monad (join)
-import Debug.Trace (traceShowId)
 
 
 -- | charEncode mapping in Haskell
@@ -58,7 +58,7 @@ charEncode = \case
   '~' -> 'W'
 
   -- TODO: Remove this parsing workaround. Should be "X": "X"
-  'X' -> 'Y'
+  'X' -> 'x'
 
   -- '': 'Z',  -- Reserved for encoding digits
 
@@ -104,7 +104,8 @@ charDecode = \case
   'V' -> '}'
   'W' -> '~'
 
-  'Y' -> 'X'
+  -- TODO: Remove this parsing workaround. Should be "X": "X"
+  'x' -> 'X'
 
   _ -> '\0'
 
@@ -180,9 +181,15 @@ doubleXEncodeWithOptions encodeOptions text =
                 let
                   charHex = showHex (ord char) ""
                   charHexEncoded = charHex <&> hexShiftEncode
-                  padStart txt = replicate (5 - length txt) 'a' ++ txt
+                  padStart n txt = replicate (n - length txt) 'a' ++ txt
                 in
-                  "XX" ++ padStart charHexEncoded
+                  if
+                    | length charHex <= 5 ->
+                        "XX" ++ padStart 5 charHexEncoded
+                    | length charHex == 6 ->
+                        "XXY" ++ padStart 6 charHexEncoded
+                    | otherwise ->
+                        error "ERROR: Hex encoding is too long"
           )
       & join
       & T.pack
@@ -269,6 +276,20 @@ doubleXDecode text =
                 if "XXXX" `T.isPrefixOf` noXX
                 then ("XX", T.drop 4 noXX)
                 else ("X", T.drop 1 word)
+
+            | first == "Y" ->
+                (T.pack [
+                    noXX
+                      & T.drop 1  -- Remove the "Y"
+                      & T.unpack
+                      & take 6
+                      <&> hexShiftDecode
+                      & T.pack
+                      & parseHex
+                      & chr
+                  ]
+                , T.drop 7 noXX
+                )
 
             | first == "Z" ->
                 (noXX

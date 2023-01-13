@@ -37,7 +37,7 @@ const charEncode = {
   "~": "W",
 
   // TODO: Remove this parsing workaround. Should be "X": "X"
-  "X": "Y",
+  "X": "x",
 
   // "": "Z",  // Reserved for encoding digits
 }
@@ -105,17 +105,28 @@ export function doubleXEncode (
       resultStr += char
     }
     else {
-      const encodedChar =
-              charEncode[char] ||
-              char
-                .codePointAt(0)
-                .toString(16)
-                .split("")
-                .map(char => hexShiftEncode[char] )
-                .join("")
-                .padStart(5, "a") ||
-              ""
-      resultStr += "XX" + encodedChar
+      if (charEncode[char]) {
+        resultStr += "XX" + charEncode[char]
+      }
+      else {
+        const charHex = char
+          .codePointAt(0)
+          .toString(16)
+        const encodedChar = charHex
+          .split("")
+          .map(char => hexShiftEncode[char] )
+          .join("")
+
+        if (charHex.length <= 5) {
+          resultStr += "XX" + encodedChar.padStart(5, "a")
+        }
+        else if (charHex.length == 6) {
+          resultStr += "XXY" + encodedChar.padStart(6, "a")
+        }
+        else {
+          throw new Error("ERROR: Hex encoding is too long")
+        }
+      }
     }
   }
 
@@ -124,11 +135,11 @@ export function doubleXEncode (
 
 
 export function doubleXDecode (str: string): string {
-  // TODO: Remove this workaround to simplify parsing
-  const strNorm = str.replaceAll("XXXXXX", "XXYXXY")
+  // TODO: Remove this parsing workaround
+  const strNorm = str.replaceAll("XXXXXX", "XXxXXx")
 
   return strNorm
-    .split(/(XXY|XXZ[0-9]|XX[0-9A-W]|XX[a-p]{5})/)
+    .split(/(XX[a-p]{5}|XX[0-9A-W]|XXY[a-p]{6}|XXZ[0-9]|XXx)/)
     .filter(Boolean)  // Remove empty strings
     .map(word =>
       word.startsWith("XX")
@@ -145,7 +156,18 @@ export function doubleXDecode (str: string): string {
             )
           : (word.slice(2, 3) == "Z")
             ? word.slice(3, 4)
-            : charDecode[word.slice(2, 3)]
+            : (word.slice(2, 3) == "Y")
+              ? String.fromCodePoint(
+                  parseInt(
+                    word
+                      .slice(3, 9)
+                      .split("")
+                      .map(char => hexShiftDecode[char])
+                      .join(""),
+                    16
+                  )
+                )
+              : charDecode[word.slice(2, 3)]
         )
       : word
     )

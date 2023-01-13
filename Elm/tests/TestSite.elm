@@ -1,4 +1,4 @@
-module Test exposing (..)
+module TestSite exposing (..)
 
 import Blns exposing (blns)
 import DoubleXEncode exposing (..)

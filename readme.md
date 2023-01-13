@@ -29,6 +29,8 @@ Input | Output
 `id_with_ümläutß` | `id_with_XXaaapmmlXXaaaoeutXXaaanp`
 `Emoji: 😅` | `EmojiXXGXX0XXbpgaf`
 `Multi Byte Emoji: 👨‍🦲` | `MultiXX0ByteXX0EmojiXXGXX0XXbpegiXXacaanXXbpjlc`
+`\u{100000}` | `XXYbaaaaa`
+`\u{10ffff}` | `XXYbapppp`
 
 With encoding of leading digit and double underscore activated
 (necessary for GraphQL ID generation):
@@ -47,10 +49,14 @@ The encoding scheme is based on the following rules:
 1. `XX` is encoded as `XXXXXX`
 1. All other printable characters inside the ASCII range
     are encoded as a sequence of 3 characters: `XX[0-9A-W]`
-1. All other Unicode codepoints are encoded as a sequence of 7 characters:
+1. All other Unicode code points until `U+fffff` (e.g. Emojis)
+    are encoded as a sequence of 7 characters:
     `XX[a-p]{5}`, where the 5 characters are the hexadecimal representation
     with an alternative hex alphabet ranging from
     `a` to `p` instead of `0` to `f`.
+1. All Unicode code points in the Supplementary Private Use Area-B
+    (`U+100000` to `U+10ffff`) are encoded as a sequence of 9 characters:
+    `XXY[a-p]{6}`
 
 If the optional leading digit encoding is enabled,
 a leading digit is encoded as `XXZ[0-9]`.

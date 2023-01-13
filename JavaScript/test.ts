@@ -8,14 +8,13 @@ let correctConversions = 0
 let correctDigitConversions = 0
 let correctDblUnderConversions = 0
 
-listOfNaughtyStrings.forEach(str => {
-  console.info("===============================================\n")
-  console.info("original:\t", str)
+// Support characters from the Supplementary Private Use Area-B
+const extraStrings = ["\u{100000}", "\u{10FFFF}"]
+const allStrings = listOfNaughtyStrings.concat(extraStrings)
 
+allStrings.forEach((str: string) => {
   const encoded = doubleXEncode(str)
   const decoded = doubleXDecode(encoded)
-  console.info("encoded:\t", encoded)
-  console.info("decoded:\t", decoded)
   if (str !== decoded ) {
     throw new Error(
       `ERROR: Decoded string "${decoded
@@ -28,8 +27,6 @@ listOfNaughtyStrings.forEach(str => {
 
   const encodedDigit = doubleXEncode(str, { encodeLeadingDigit: true })
   const decodedDigit = doubleXDecode(encodedDigit)
-  console.info("encoded leading digit:\t", encodedDigit)
-  console.info("decoded leadingt digit:\t", decodedDigit)
   if (str !== decodedDigit ) {
     throw new Error(
       `ERROR: Decoded string "${decodedDigit
@@ -42,8 +39,6 @@ listOfNaughtyStrings.forEach(str => {
 
   const encodedDblUnder = doubleXEncode(str, { encodeDoubleUnderscore: true })
   const decodedDblUnder = doubleXDecode(encodedDblUnder)
-  console.info("encoded DblUnder:\t", encodedDblUnder)
-  console.info("decoded DblUnder:\t", decodedDblUnder)
   if (str !== decodedDblUnder ) {
     throw new Error(
       `ERROR: Decoded string "${decodedDblUnder
@@ -53,17 +48,13 @@ listOfNaughtyStrings.forEach(str => {
   else {
     correctDblUnderConversions += 1
   }
-
-  console.log("\x1Bc")
 })
-
-console.info("===============================================\n")
 
 console.info(`
   Correct conversions: ${
-    correctConversions}/${listOfNaughtyStrings.length}
+    correctConversions}/${allStrings.length}
   Correct Leading Digit conversions: ${
-    correctDigitConversions}/${listOfNaughtyStrings.length}
+    correctDigitConversions}/${allStrings.length}
   Correct Leading Digit conversions: ${
-    correctDblUnderConversions}/${listOfNaughtyStrings.length}
+    correctDblUnderConversions}/${allStrings.length}
 `)

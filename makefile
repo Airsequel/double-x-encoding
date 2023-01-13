@@ -9,14 +9,17 @@ test: test-elm test-haskell test-javascript
 
 .PHONY: test-elm
 test-elm:
-		cd Elm && elm make Test.elm --output=elm-tests.js
+	@printf "\n\n========== ELM TESTS ==========\n\n"
+	cd Elm && npx elm-test
 
 
 .PHONY: test-haskell
 test-haskell:
-		stack runhaskell Haskell/Test.hs
+	@printf "\n\n========== HASKELL TESTS ==========\n\n"
+	stack runhaskell Haskell/Test.hs
 
 
 .PHONY: test-javascript
 test-javascript:
-		deno --unstable run JavaScript/test.ts
+	@printf "\n\n========== JAVASCRIPT TESTS ==========\n\n"
+	deno --unstable run JavaScript/test.ts
