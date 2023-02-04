@@ -5,7 +5,6 @@ module DoubleXEncode exposing (..)
 
 import String exposing (replace)
 import UInt64
-import UInt64.Digits
 
 
 
@@ -391,8 +390,8 @@ doubleXEncodeWithOptions encodeOptions string =
                                         |> Char.toCode
                                         |> UInt64.fromInt
                                         |> UInt64.toDigits
-                                            UInt64.Digits.hexLower
-                                        |> UInt64.Digits.toString
+                                            UInt64.hexLower
+                                        |> UInt64.digitsToString
 
                                 charHexEncoded =
                                     charHex
