@@ -1,4 +1,4 @@
-import listOfNaughtyStrings from "npm:blns"
+import listOfNaughtyStrings from "blns"
 import {
   doubleXEncode,
   doubleXDecode,

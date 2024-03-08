@@ -22,4 +22,4 @@ test-haskell:
 .PHONY: test-javascript
 test-javascript:
 	@printf "\n\n========== JAVASCRIPT TESTS ==========\n\n"
-	deno --unstable run JavaScript/test.ts
+	bun run JavaScript/test.ts
