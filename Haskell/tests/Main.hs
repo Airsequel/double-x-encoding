@@ -2,7 +2,7 @@
 
 {- ORMOLU_DISABLE -}
 
-module Haskell.Test where
+module Main where
 
 import Data.Function ((&))
 import qualified Data.Text as T
@@ -13,7 +13,7 @@ import Numeric (showHex)
 import Data.Char (ord, isDigit)
 import Control.Monad (join)
 
-import Haskell.DoubleXEncode
+import DoubleXEncoding
   (EncodeOptions(..), doubleXEncode, doubleXEncodeGql, doubleXDecode)
 
 
@@ -73,7 +73,7 @@ main = do
   expectDecode "alsoXXZ0middle" "also0middle"
 
   -- https://github.com/minimaxir/big-list-of-naughty-strings
-  txtFile <- readFile "Haskell/blns.txt"
+  txtFile <- readFile "./tests/blns.txt"
 
   let
     blns = T.lines $ T.pack txtFile

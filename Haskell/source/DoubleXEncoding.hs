@@ -1,11 +1,20 @@
-{-| Implementation of double-X-encoder and -decoder in Haskell -}
+{- | Implementation of Double-X-Encoding encoder and decoder in Haskell
+
+Main functions:
+
+* `doubleXEncode`
+* `doubleXEncodeGql`
+* `doubleXDecode`
+-}
+
 {- ORMOLU_DISABLE -}
 
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MultiWayIf #-}
 
-module Haskell.DoubleXEncode where
+
+module DoubleXEncoding where
 
 import Data.Function ((&))
 import qualified Data.Text as T
@@ -17,7 +26,7 @@ import Data.Char (ord, isDigit, chr)
 import Control.Monad (join)
 
 
--- | charEncode mapping in Haskell
+-- | Encoder mapping for ASCII characters.
 charEncode :: Char -> Char
 charEncode = \case
   ' ' -> '0'
@@ -65,6 +74,7 @@ charEncode = \case
   _ -> '\0'
 
 
+-- | Decoder mapping for ASCII characters.
 charDecode :: Char -> Char
 charDecode = \case
   '0' -> ' '
@@ -110,6 +120,8 @@ charDecode = \case
   _ -> '\0'
 
 
+-- | Map hex characters to an alternative hex alphabet
+-- ranging from a to p instead of 0 to f.
 hexShiftEncode :: Char -> Char
 hexShiftEncode = \case
   '0' -> 'a'
@@ -132,6 +144,7 @@ hexShiftEncode = \case
   _ -> '\0'
 
 
+-- | Map alternative hex alphabet back to the original hex alphabet.
 hexShiftDecode :: Char -> Char
 hexShiftDecode = \case
   'a' -> '0'
@@ -154,12 +167,24 @@ hexShiftDecode = \case
   _ -> '\0'
 
 
+{-|
+  Options for encoding:
+
+  [`encodeLeadingDigit`]: Encode the leading digit of the input string
+
+  [`encodeDoubleUnderscore`]: Encode double underscores `__` as `XXRXXR`
+
+  Especially relevant for GraphQL, as
+  [the spec](https://spec.graphql.org/October2021/#sec-Names)
+  does not allow leading digits or double underscores for field names.
+-}
 data EncodeOptions = EncodeOptions
   { encodeLeadingDigit :: Bool
   , encodeDoubleUnderscore :: Bool
   }
 
 
+-- | Encode a text using the Double-X-Encoding algorithm with provided options.
 doubleXEncodeWithOptions :: EncodeOptions -> Text -> Text
 doubleXEncodeWithOptions encodeOptions text =
   let
@@ -217,8 +242,8 @@ doubleXEncodeWithOptions encodeOptions text =
       encodeStandard text
 
 
-
-
+-- | Default options with no leading digit encoding
+-- and no double underscore encoding.
 defaultOptions :: EncodeOptions
 defaultOptions = EncodeOptions
     { encodeLeadingDigit = False
@@ -226,11 +251,17 @@ defaultOptions = EncodeOptions
     }
 
 
+-- | Encode a text using the Double-X-Encoding algorithm.
+--
+-- >>> doubleXEncode "id-with.special$chars!"
+-- "idXXDwithXXEspecialXX4charsXX1"
 doubleXEncode :: Text -> Text
 doubleXEncode =
     doubleXEncodeWithOptions defaultOptions
 
 
+-- | Default options for GraphQL encoding.
+-- Leading digits or double underscores are not allowed for field names.
 gqlOptions :: EncodeOptions
 gqlOptions = EncodeOptions
     { encodeLeadingDigit = True
@@ -238,21 +269,28 @@ gqlOptions = EncodeOptions
     }
 
 
+-- | Encode a text using the Double-X-Encoding algorithm with GraphQL options.
+--
+-- >>> doubleXEncodeGql "1FileFormat__"
+-- "XXZ1FileFormatXXRXXR"
 doubleXEncodeGql :: Text -> Text
 doubleXEncodeGql =
     doubleXEncodeWithOptions gqlOptions
 
 
-parseHex :: Text -> Int
-parseHex text =
-  case readHex (T.unpack text) of
-    [(int, "")] -> int
-    _ -> 0
-
-
+-- | Decode a Double-X-Encoding encoded text.
+--
+-- >>> doubleXDecode "idXXDwithXXEspecialXX4charsXX1"
+-- "id-with.special$chars!"
 doubleXDecode :: Text -> Text
 doubleXDecode text =
   let
+    parseHex :: Text -> Int
+    parseHex text =
+      case readHex (T.unpack text) of
+        [(int, "")] -> int
+        _ -> 0
+
     decodeWord :: Text -> (Text, Text)
     decodeWord word =
       let

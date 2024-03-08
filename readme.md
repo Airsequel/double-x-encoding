@@ -67,5 +67,7 @@ double underscores are encoded as `XXRXXR`.
 
 ## Installation
 
-The code is not yet available via common package managers.
-Please copy the code into your project for the time being.
+- Haskell: [Via Hackage](https://hackage.haskell.org/package/double-x-encoding)
+- Other languages: \
+    The code is not yet available via common package managers.
+    Please copy the code into your project for the time being.

@@ -1,0 +1,36 @@
+name: double-x-encoding
+version: 1.1.0.0
+synopsis: Encoding scheme to encode any Unicode string with only [0-9a-zA-Z_]
+description: |
+  Double-X-Encoding is an encoding scheme to encode any Unicode string
+  with only characters from [0-9a-zA-Z_].
+  Therefore it's quite similar to URL percent-encoding.
+  It's especially useful for GraphQL ID generation,
+  as it includes support for encoding leading digits and double underscores.
+category: Codec, Codecs, GraphQL, ASCII, Unicode, Encoding, Decoding
+github: Airsequel/double-x-encoding/Haskell
+license: ISC
+author: Adrian Sieber
+maintainer: adrian@feram.io
+
+language: GHC2021
+default-extensions:
+  - LambdaCase
+  - MultiWayIf
+  - OverloadedStrings
+
+dependencies:
+  - base >= 4.18 && < 4.20
+  - Cabal-syntax >= 3.10 && < 3.12
+  - text >= 2.0 && < 2.2
+
+library:
+  source-dirs: source
+  exposed-modules: [DoubleXEncoding]
+
+tests:
+  double-x-encoding-test:
+    source-dirs: tests
+    main: Main.hs
+    dependencies:
+      - double-x-encoding

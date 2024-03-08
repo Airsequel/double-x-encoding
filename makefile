@@ -16,7 +16,7 @@ test-elm:
 .PHONY: test-haskell
 test-haskell:
 	@printf "\n\n========== HASKELL TESTS ==========\n\n"
-	stack runhaskell Haskell/Test.hs
+	cd Haskell && stack test
 
 
 .PHONY: test-javascript
