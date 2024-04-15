@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           double-x-encoding
-version:        1.2.0
+version:        1.2.1
 synopsis:       Encoding scheme to encode any Unicode string with only [0-9a-zA-Z_]
 description:    Double-X-Encoding is an encoding scheme to encode any Unicode string
                 with only characters from [0-9a-zA-Z_].
