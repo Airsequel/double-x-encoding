@@ -3,6 +3,14 @@ help: makefile
 	@tail -n +4 makefile | grep ".PHONY"
 
 
+# Include the readme.md file in each language directory
+.PHONY: build
+build: readme.md
+	cp $< Elm
+	cp $< Haskell
+	cp $< JavaScript
+
+
 .PHONY: test
 test: test-elm test-haskell test-javascript
 
