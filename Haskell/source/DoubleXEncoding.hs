@@ -12,6 +12,7 @@ Main functions:
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 
 
 module DoubleXEncoding where
@@ -186,60 +187,59 @@ data EncodeOptions = EncodeOptions
 
 -- | Encode a text using the Double-X-Encoding algorithm with provided options.
 doubleXEncodeWithOptions :: EncodeOptions -> Text -> Text
-doubleXEncodeWithOptions encodeOptions text =
+doubleXEncodeWithOptions encodeOptions text = do
   let
     encodeStandard text = text
       & replace "XX" "XXXXXX"
       & (\txt ->
-          if encodeOptions&encodeDoubleUnderscore
+          if encodeOptions.encodeDoubleUnderscore
           then txt & replace "__" "XXRXXR"
           else txt
         )
-      & T.unpack
-      <&> (\char ->
-            if isAsciiAlphaNum char || char == '_'
-            then [char]
-            else
-              if charEncode char /= '\0'
-              then ['X', 'X', charEncode char]
-              else
-                let
-                  charHex = showHex (ord char) ""
-                  charHexEncoded = charHex <&> hexShiftEncode
-                  padStart n txt = replicate (n - length txt) 'a' ++ txt
-                in
-                  if
-                    | length charHex <= 5 ->
-                        "XX" ++ padStart 5 charHexEncoded
-                    | length charHex == 6 ->
-                        "XXY" ++ padStart 6 charHexEncoded
-                    | otherwise ->
-                        error "ERROR: Hex encoding is too long"
-          )
-      & join
-      & T.pack
+      & T.concatMap (\char ->
+          if isAsciiAlphaNum char || char == '_'
+          then T.singleton char
+          else
+            if charEncode char /= '\0'
+            then T.pack ['X', 'X', charEncode char]
+            else do
+              let
+                charHex = T.pack $ showHex (ord char) ""
+                charHexEncoded = charHex & T.map hexShiftEncode
+                padStart n txt =
+                  ("a" & T.replicate (n - T.length txt)) <> txt
+                charHexLength = T.length charHex
+
+              if
+                | charHexLength <= 5 ->
+                    "XX" <> padStart 5 charHexEncoded
+                | charHexLength == 6 ->
+                    "XXY" <> padStart 6 charHexEncoded
+                | otherwise ->
+                    error "ERROR: Hex encoding is too long"
+        )
 
     encodeDigit digit =
       T.pack ['X', 'X', 'Z', digit]
-  in
-    if encodeOptions&encodeLeadingDigit
-    then
-      case T.unpack text of
-        [] -> ""
 
-        leadingChar : rest  ->
-          if not $ isDigit leadingChar
-          then encodeStandard text
+  if encodeOptions.encodeLeadingDigit
+  then
+    case T.uncons text of
+      Nothing -> ""
+
+      Just (leadingChar, rest) ->
+        if not $ isDigit leadingChar
+        then encodeStandard text
+        else
+          if T.null rest
+          then encodeDigit leadingChar
           else
-            if null rest
-            then encodeDigit leadingChar
-            else
-              encodeDigit leadingChar
-              <> doubleXEncodeWithOptions
-                    encodeOptions { encodeLeadingDigit = False }
-                    (T.pack rest)
-    else
-      encodeStandard text
+            encodeDigit leadingChar
+            <> doubleXEncodeWithOptions
+                  encodeOptions { encodeLeadingDigit = False }
+                  rest
+  else
+    encodeStandard text
 
 
 -- | Default options with no leading digit encoding
@@ -283,7 +283,7 @@ doubleXEncodeGql =
 -- >>> doubleXDecode "idXXDwithXXEspecialXX4charsXX1"
 -- "id-with.special$chars!"
 doubleXDecode :: Text -> Text
-doubleXDecode text =
+doubleXDecode text = do
   let
     parseHex :: Text -> Int
     parseHex text =
@@ -292,64 +292,57 @@ doubleXDecode text =
         _ -> 0
 
     decodeWord :: Text -> (Text, Text)
-    decodeWord word =
+    decodeWord word = do
       let
         noXX = T.drop 2 word
         first = T.take 1 noXX
-      in
-        if  | first >= "a" && first <= "p" ->
-                (T.pack [
-                    noXX
-                      & T.unpack
-                      & take 5
-                      <&> hexShiftDecode
-                      & T.pack
-                      & parseHex
-                      & chr
-                  ]
-                , T.drop 5 noXX
-                )
 
-            | first == "X" ->
-                if "XXXX" `T.isPrefixOf` noXX
-                then ("XX", T.drop 4 noXX)
-                else ("X", T.drop 1 word)
-
-            | first == "Y" ->
-                (T.pack [
-                    noXX
-                      & T.drop 1  -- Remove the "Y"
-                      & T.unpack
-                      & take 6
-                      <&> hexShiftDecode
-                      & T.pack
-                      & parseHex
-                      & chr
-                  ]
-                , T.drop 7 noXX
-                )
-
-            | first == "Z" ->
-                (noXX
-                    & T.drop 1
-                    & T.take 1
-                , T.drop 2 noXX
-                )
-
-            | otherwise ->
+      if  | first >= "a" && first <= "p" ->
               (noXX
-                & T.take 1
-                & T.unpack
-                <&> charDecode
-                & T.pack
-              , T.drop 1 noXX
+                    & T.take 5
+                    & T.map hexShiftDecode
+                    & parseHex
+                    & chr
+                    & T.singleton
+
+              , T.drop 5 noXX
               )
-  in
-    text
-      & T.breakOn "XX"
-      & \case
-          ("", end) -> case decodeWord end of
-            (decoded, "") -> decoded
-            (decoded, rest) -> decoded <> doubleXDecode rest
-          (start, "") -> start
-          (start, end) -> start <> doubleXDecode end
+
+          | first == "X" ->
+              if "XXXX" `T.isPrefixOf` noXX
+              then ("XX", T.drop 4 noXX)
+              else ("X", T.drop 1 word)
+
+          | first == "Y" ->
+              (  noXX
+                    & T.drop 1  -- Remove the "Y"
+                    & T.take 6
+                    & T.map hexShiftDecode
+                    & parseHex
+                    & chr
+                    & T.singleton
+              , T.drop 7 noXX
+              )
+
+          | first == "Z" ->
+              (noXX
+                  & T.drop 1
+                  & T.take 1
+              , T.drop 2 noXX
+              )
+
+          | otherwise ->
+            (noXX
+              & T.take 1
+              & T.map charDecode
+            , T.drop 1 noXX
+            )
+
+  text
+    & T.breakOn "XX"
+    & \case
+        ("", end) -> case decodeWord end of
+          (decoded, "") -> decoded
+          (decoded, rest) -> decoded <> doubleXDecode rest
+        (start, "") -> start
+        (start, end) -> start <> doubleXDecode end
