@@ -19,6 +19,8 @@ author:         Adrian Sieber
 maintainer:     adrian@feram.io
 license:        ISC
 build-type:     Simple
+extra-source-files:
+  readme.md
 
 source-repository head
   type: git

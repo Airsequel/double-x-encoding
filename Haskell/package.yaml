@@ -12,6 +12,8 @@ github: Airsequel/double-x-encoding/Haskell
 license: ISC
 author: Adrian Sieber
 maintainer: adrian@feram.io
+extra-source-files:
+  - readme.md
 
 language: GHC2021
 default-extensions:
