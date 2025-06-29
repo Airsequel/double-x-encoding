@@ -21,6 +21,7 @@ license:        ISC
 build-type:     Simple
 extra-source-files:
   readme.md
+  tests/blns.txt
 
 source-repository head
   type: git

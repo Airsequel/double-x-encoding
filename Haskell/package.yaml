@@ -14,6 +14,7 @@ author: Adrian Sieber
 maintainer: adrian@feram.io
 extra-source-files:
   - readme.md
+  - tests/blns.txt
 
 language: GHC2021
 default-extensions:
