@@ -1,5 +1,5 @@
 name: double-x-encoding
-version: 1.2.1
+version: 1.2.2
 synopsis: Encoding scheme to encode any Unicode string with only [0-9a-zA-Z_]
 description: |
   Double-X-Encoding is an encoding scheme to encode any Unicode string

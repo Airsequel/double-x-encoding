@@ -31,3 +31,15 @@ test-haskell:
 test-javascript:
 	@printf "\n\n========== JAVASCRIPT TESTS ==========\n\n"
 	bun run JavaScript/test.ts
+
+
+.PHONY: docs
+docs:
+	cd Haskell && stack haddock --haddock-for-hackage
+
+
+.PHONY: release
+release: docs
+	cd Haskell \
+	&& stack upload . \
+	&& stack upload --documentation .
