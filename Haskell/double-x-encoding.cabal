@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.38.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -39,9 +39,9 @@ library
     MultiWayIf
     OverloadedStrings
   build-depends:
-    Cabal-syntax >=3.10 && <3.12,
-    base >=4.18 && <4.20,
-    text >=2.0 && <2.2
+    Cabal-syntax >=3.10.3 && <=3.14.2,
+    base >=4.19.2 && <=4.21,
+    text >=2.1.1 && <2.2
   default-language: GHC2021
 
 test-suite double-x-encoding-test
@@ -56,8 +56,8 @@ test-suite double-x-encoding-test
     MultiWayIf
     OverloadedStrings
   build-depends:
-    Cabal-syntax >=3.10 && <3.12,
-    base >=4.18 && <4.20,
+    Cabal-syntax >=3.10.3 && <=3.14.2,
+    base >=4.19.2 && <=4.21,
     double-x-encoding,
-    text >=2.0 && <2.2
+    text >=2.1.1 && <2.2
   default-language: GHC2021
